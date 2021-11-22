@@ -1,10 +1,11 @@
 package domain
 
+/* Account request */
 type Account struct {
-	Account AccountInfo `json:"account"`
+	Account accountInfo `json:"account"`
 }
 
-type AccountInfo struct {
+type accountInfo struct {
 	ActiveCard     bool  `json:"active-card"`
 	AvailableLimit int64 `json:"available-limit"`
 }

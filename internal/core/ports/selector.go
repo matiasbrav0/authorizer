@@ -1,5 +1,7 @@
 package ports
 
+import "github.com/mbravovaisma/authorizer/internal/core/domain"
+
 type Selector interface {
-	OperationSelector(operation []byte) error
+	OperationSelector([]byte) (domain.Response, error)
 }
