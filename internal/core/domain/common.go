@@ -1,14 +1,17 @@
 package domain
 
-/* Account response */
+import "time"
+
 type Response struct {
-	Account    *AccountInfo `json:"account"`
-	Violations []string     `json:"violations"`
+	Account    *Account `json:"account"`
+	Violations []string `json:"violations"`
 }
 
 /* Object to save in mapper */
-type AccountData struct {
-	AccountInfo      *AccountInfo
-	AccountMovements []Response
-	TransactionsInfo []Transaction
+type AuthorizerData struct {
+	Account           *Account
+	AccountMovements  []Response
+	TransactionsInfo  []Transaction
+	AuthorizationTime time.Time
+	Attempts          uint8
 }

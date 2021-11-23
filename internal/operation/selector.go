@@ -30,24 +30,24 @@ func (s *selector) OperationSelector(request []byte) (domain.Response, error) {
 
 	/* Perform an account operation */
 	if strings.Contains(operation, "account") {
-		var accountOperation domain.Account
+		var accountOperation domain.AccountRequest
 		if err := json.Unmarshal(request, &accountOperation); err != nil {
 			log.Error("can't unmarshal account request", zap.Error(err))
 			return domain.Response{}, err
 		}
 
-		return s.accountService.CreateAccount(&accountOperation)
+		return s.accountService.CreateAccount(&accountOperation.Account)
 	}
 
 	/* Perform a transaction operation */
 	if strings.Contains(operation, "transaction") {
-		var transactionOperation domain.Transaction
+		var transactionOperation domain.TransactionRequest
 		if err := json.Unmarshal(request, &transactionOperation); err != nil {
 			log.Error("can't unmarshal transaction request", zap.Error(err))
 			return domain.Response{}, err
 		}
 
-		return s.transactionService.PerformTransaction(&transactionOperation)
+		return s.transactionService.PerformTransaction(&transactionOperation.Transaction)
 	}
 
 	/* Invalid operation */

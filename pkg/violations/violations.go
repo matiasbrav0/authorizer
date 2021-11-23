@@ -18,4 +18,7 @@ const (
 
 	// There should be no more than 1 similar transaction (same amount and merchant) within a 2 minutes interval
 	DoubledTransaction = "doubled-transaction"
+
+	// Unexpected error
+	UnexpectedViolation = "unexpected-violation"
 )

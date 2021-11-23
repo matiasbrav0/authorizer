@@ -22,12 +22,12 @@ func (a *account) CreateAccount(account *domain.Account) (domain.Response, error
 		accountData := a.repository.GetAccountData(constants.AccountID)
 
 		return domain.Response{
-			Account:    accountData.AccountInfo,
+			Account:    accountData.Account,
 			Violations: []string{violations.AccountAlreadyInitialized},
 		}, nil
 	}
 
-	response := a.repository.AccountCreate(constants.AccountID, &account.Account)
+	response := a.repository.AccountCreate(constants.AccountID, account)
 
 	return response.AccountMovements[0], nil
 }
