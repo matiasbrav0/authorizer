@@ -2,6 +2,7 @@ package app
 
 import (
 	"bufio"
+	"encoding/json"
 	"fmt"
 	"os"
 
@@ -27,6 +28,7 @@ func Start() {
 		}
 
 		response, _ := selector.OperationSelector(scanner.Bytes())
-		fmt.Printf("%+v \n", response)
+		responseJson, _ := json.Marshal(response)
+		fmt.Println(string(responseJson))
 	}
 }

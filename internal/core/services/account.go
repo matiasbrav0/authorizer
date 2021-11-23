@@ -22,7 +22,10 @@ func (a *account) CreateAccount(account *domain.Account) (domain.Response, error
 		accountData := a.repository.GetAccountData(constants.AccountID)
 
 		return domain.Response{
-			Account:    *accountData.AccountInfo,
+			Account: domain.AccountInfo{
+				ActiveCard:     accountData.AccountInfo.ActiveCard,
+				AvailableLimit: accountData.AccountInfo.AvailableLimit,
+			},
 			Violations: []string{violations.AccountAlreadyInitialized},
 		}, nil
 	}
