@@ -2,8 +2,8 @@ package domain
 
 /* Account response */
 type Response struct {
-	Account    AccountInfo `json:"account"`
-	Violations []string    `json:"violations"`
+	Account    *AccountInfo `json:"account"`
+	Violations []string     `json:"violations"`
 }
 
 /* Object to save in mapper */

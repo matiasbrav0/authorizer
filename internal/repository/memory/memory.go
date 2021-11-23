@@ -13,18 +13,12 @@ func NewMemory() ports.AuthorizerRepository {
 	return &memory{mapper: make(map[string]domain.AccountData)}
 }
 
-func (m *memory) AccountCreate(id string, accountToSave *domain.Account) *domain.AccountData {
+func (m *memory) AccountCreate(id string, accountToSave *domain.AccountInfo) *domain.AccountData {
 	/* Create object to save */
 	data := domain.AccountData{
-		AccountInfo: &domain.AccountInfo{
-			ActiveCard:     accountToSave.Account.ActiveCard,
-			AvailableLimit: accountToSave.Account.AvailableLimit,
-		},
+		AccountInfo: accountToSave,
 		AccountMovements: []domain.Response{{
-			Account: domain.AccountInfo{
-				ActiveCard:     accountToSave.Account.ActiveCard,
-				AvailableLimit: accountToSave.Account.AvailableLimit,
-			},
+			Account:    accountToSave,
 			Violations: []string{},
 		}},
 		TransactionsInfo: []domain.Transaction{},
@@ -42,7 +36,7 @@ func (m *memory) AccountExist(id string) bool {
 
 func (m *memory) UpdateAccountData(
 	id string,
-	accountInfo *domain.Account,
+	accountInfo *domain.AccountInfo,
 	transaction *domain.Transaction,
 	accountMovement *domain.Response,
 ) *domain.AccountData {
@@ -53,8 +47,7 @@ func (m *memory) UpdateAccountData(
 
 	data := m.GetAccountData(id)
 
-	data.AccountInfo.ActiveCard = accountInfo.Account.ActiveCard
-	data.AccountInfo.AvailableLimit = accountInfo.Account.AvailableLimit
+	data.AccountInfo = accountInfo
 	data.AccountMovements = append(data.AccountMovements, *accountMovement)
 	data.TransactionsInfo = append(data.TransactionsInfo, *transaction)
 
