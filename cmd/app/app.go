@@ -25,6 +25,6 @@ func Start() {
 			log.Error("error while scan a new line of operations", zap.Error(err))
 		}
 
-		_ = selector.OperationSelector(scanner.Bytes())
+		_, _ = selector.OperationSelector(scanner.Bytes())
 	}
 }

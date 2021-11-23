@@ -10,3 +10,10 @@ type data struct {
 	ActiveCard     bool `json:"active-card"`
 	AvailableLimit int  `json:"available-limit"`
 }
+
+/* Object to save in mapper */
+type AccountData struct {
+	AccountInfo      *Account
+	AccountMovements []Response
+	TransactionsInfo []Transaction
+}
