@@ -4,6 +4,7 @@ import (
 	"github.com/mbravovaisma/authorizer/internal/core/domain"
 	"github.com/mbravovaisma/authorizer/internal/core/ports"
 	"github.com/mbravovaisma/authorizer/pkg/constants"
+	"github.com/mbravovaisma/authorizer/pkg/violations"
 )
 
 type account struct {
@@ -18,8 +19,15 @@ func NewAccount(repository ports.AuthorizerRepository) ports.Account {
 
 func (a *account) CreateAccount(account *domain.Account) (domain.Response, error) {
 	if a.repository.AccountExist(constants.AccountID) {
+		accountData := a.repository.GetAccountData(constants.AccountID)
 
+		return domain.Response{
+			Account:    *accountData.AccountInfo,
+			Violations: []string{violations.AccountAlreadyInitialized},
+		}, nil
 	}
-	a.repository.AccountSave(constants.AccountID, account)
-	return domain.Response{}, nil
+
+	response := a.repository.AccountCreate(constants.AccountID, account)
+
+	return response.AccountMovements[0], nil
 }

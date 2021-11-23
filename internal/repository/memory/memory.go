@@ -16,9 +16,12 @@ func NewMemory() ports.AuthorizerRepository {
 func (m *memory) AccountCreate(id string, accountToSave *domain.Account) *domain.AccountData {
 	/* Create object to save */
 	data := domain.AccountData{
-		AccountInfo:      accountToSave,
-		AccountMovements: make([]domain.Response, 0),
-		TransactionsInfo: make([]domain.Transaction, 0),
+		AccountInfo: accountToSave,
+		AccountMovements: []domain.Response{{
+			Account:    *accountToSave,
+			Violations: []string{},
+		}},
+		TransactionsInfo: []domain.Transaction{},
 	}
 
 	m.save(id, data)
@@ -42,7 +45,7 @@ func (m *memory) UpdateAccountData(
 		return &domain.AccountData{}
 	}
 
-	data := m.getAccountData(id)
+	data := m.GetAccountData(id)
 
 	data.AccountInfo = accountInfo
 	data.AccountMovements = append(data.AccountMovements, *accountMovement)
@@ -53,15 +56,15 @@ func (m *memory) UpdateAccountData(
 	return data
 }
 
-func (m *memory) save(id string, data domain.AccountData) {
-	m.mapper[id] = data
-}
-
-func (m *memory) getAccountData(id string) *domain.AccountData {
+func (m *memory) GetAccountData(id string) *domain.AccountData {
 	if !m.AccountExist(id) {
 		return &domain.AccountData{}
 	}
 
 	accountData, _ := m.mapper[id]
 	return &accountData
+}
+
+func (m *memory) save(id string, data domain.AccountData) {
+	m.mapper[id] = data
 }

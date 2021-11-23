@@ -2,6 +2,7 @@ package app
 
 import (
 	"bufio"
+	"fmt"
 	"os"
 
 	"github.com/mbravovaisma/authorizer/internal/core/services"
@@ -25,6 +26,7 @@ func Start() {
 			log.Error("error while scan a new line of operations", zap.Error(err))
 		}
 
-		_, _ = selector.OperationSelector(scanner.Bytes())
+		response, _ := selector.OperationSelector(scanner.Bytes())
+		fmt.Printf("%+v \n", response)
 	}
 }
