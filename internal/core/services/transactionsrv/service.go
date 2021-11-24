@@ -56,15 +56,21 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 		violations = append(violations, v.HighFrequencySmallInterval)
 	}
 
+	/* Make a transaction */
+	transaction := domain.NewTransaction(amount, merchant, time)
+
+	/* Violates the doubled-transaction */
+	if isDuplicatedTransaction(account, transaction) {
+		violations = append(violations, v.DoubledTransaction)
+	}
+
+	/* If a violation occurred, don't execute transaction */
 	if len(violations) > 0 {
 		return domain.Movement{
 			Account:    &account,
 			Violations: violations,
 		}, nil
 	}
-
-	/* Make a transaction */
-	transaction := domain.NewTransaction(amount, merchant, time)
 
 	/* Processing a transaction in happy path */
 	execute(&account, transaction)
@@ -107,4 +113,25 @@ func execute(account *domain.Account, transaction domain.Transaction) {
 
 	/* Add an attempt */
 	account.Attempts += 1
+}
+func isDuplicatedTransaction(account domain.Account, transaction domain.Transaction) bool {
+	if account.Transactions == nil {
+		return false
+	}
+
+	for len(account.Transactions) > 0 {
+		length := len(account.Transactions) - 1
+		lastTransaction := account.Transactions[length]
+		if !account.ViolatesTheIntervalToPerformATransaction(lastTransaction.Time) {
+			if transaction.Amount == lastTransaction.Amount && transaction.Merchant == lastTransaction.Merchant {
+				return true
+			}
+		} else {
+			return false
+		}
+
+		account.Transactions = account.Transactions[:length]
+	}
+
+	return false
 }
