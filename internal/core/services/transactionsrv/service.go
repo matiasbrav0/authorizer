@@ -3,6 +3,8 @@ package transactionsrv
 import (
 	"time"
 
+	"github.com/mbravovaisma/authorizer/internal/core/config"
+
 	"github.com/mbravovaisma/authorizer/pkg/log"
 	"go.uber.org/zap"
 
@@ -91,6 +93,29 @@ func (s *service) saveAccountIntoRepository(account domain.Account) error {
 	return s.repository.Save(constants.AccountID, account)
 }
 
+func isDuplicatedTransaction(account domain.Account, transaction domain.Transaction) bool {
+	if account.Transactions == nil {
+		return false
+	}
+	// [trx 1, trx2, trx3, trx4]
+	for len(account.Transactions) > 0 {
+		length := len(account.Transactions) - 1
+
+		lastTransaction := account.Transactions[length]
+		if transaction.Time.Before(lastTransaction.Time.Add(config.HighFrequencySmallIntervalTime)) {
+			if transaction.Amount == lastTransaction.Amount && transaction.Merchant == lastTransaction.Merchant {
+				return true
+			}
+		} else {
+			return false
+		}
+
+		account.Transactions = account.Transactions[:length]
+	}
+
+	return false
+}
+
 func execute(account *domain.Account, transaction domain.Transaction) {
 	/* Subtract amount from available limit */
 	account.AvailableLimit -= transaction.Amount
@@ -113,26 +138,4 @@ func execute(account *domain.Account, transaction domain.Transaction) {
 
 	/* Add an attempt */
 	account.Attempts += 1
-}
-func isDuplicatedTransaction(account domain.Account, transaction domain.Transaction) bool {
-	if account.Transactions == nil {
-		return false
-	}
-
-	for len(account.Transactions) > 0 {
-		length := len(account.Transactions) - 1
-
-		lastTransaction := account.Transactions[length]
-		if !account.ViolatesTheIntervalToPerformATransaction(lastTransaction.Time) {
-			if transaction.Amount == lastTransaction.Amount && transaction.Merchant == lastTransaction.Merchant {
-				return true
-			}
-		} else {
-			return false
-		}
-
-		account.Transactions = account.Transactions[:length]
-	}
-
-	return false
 }
