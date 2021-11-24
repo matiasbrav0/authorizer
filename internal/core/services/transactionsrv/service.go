@@ -121,6 +121,7 @@ func isDuplicatedTransaction(account domain.Account, transaction domain.Transact
 
 	for len(account.Transactions) > 0 {
 		length := len(account.Transactions) - 1
+
 		lastTransaction := account.Transactions[length]
 		if !account.ViolatesTheIntervalToPerformATransaction(lastTransaction.Time) {
 			if transaction.Amount == lastTransaction.Amount && transaction.Merchant == lastTransaction.Merchant {
