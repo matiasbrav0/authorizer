@@ -6,9 +6,11 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mbravovaisma/authorizer/internal/core/services"
+	"github.com/mbravovaisma/authorizer/internal/repositories/authorizerrepo"
+
+	"github.com/mbravovaisma/authorizer/internal/core/services/accountsrv"
+	"github.com/mbravovaisma/authorizer/internal/core/services/transactionsrv"
 	"github.com/mbravovaisma/authorizer/internal/operation"
-	"github.com/mbravovaisma/authorizer/internal/repository/memory"
 
 	"github.com/mbravovaisma/authorizer/pkg/log"
 	"go.uber.org/zap"
@@ -17,10 +19,10 @@ import (
 func Start() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	mem := memory.NewMemory()
-	trxservice := services.NewTransaction(mem)
-	accountService := services.NewAccount(mem)
-	selector := operation.NewSelector(accountService, trxservice)
+	mem := authorizerrepo.New()
+	transactionService := transactionsrv.New(mem)
+	accountService := accountsrv.New(mem)
+	selector := operation.NewSelector(accountService, transactionService)
 
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
