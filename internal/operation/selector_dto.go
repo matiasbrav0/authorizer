@@ -1,13 +1,28 @@
 package operation
 
-import "github.com/mbravovaisma/authorizer/internal/core/domain"
+import (
+	"time"
+
+	"github.com/mbravovaisma/authorizer/internal/core/domain"
+)
+
+type AccountsFields struct {
+	ActiveCard     bool  `json:"active-card"`
+	AvailableLimit int64 `json:"available-limit"`
+}
 
 type AccountOperation struct {
-	Account domain.Account `json:"account"`
+	Account AccountsFields `json:"account"`
+}
+
+type TransactionFields struct {
+	Amount   int64     `json:"amount"`
+	Merchant string    `json:"merchant"`
+	Time     time.Time `json:"time"`
 }
 
 type TransactionOperation struct {
-	Transaction domain.Transaction `json:"transaction"`
+	Transaction TransactionFields `json:"transaction"`
 }
 
 type Response domain.Movement

@@ -3,70 +3,66 @@ package transactionsrv
 import (
 	"time"
 
-	"github.com/mbravovaisma/authorizer/internal/core/config"
-
 	"github.com/mbravovaisma/authorizer/pkg/log"
-	"go.uber.org/zap"
 
-	v "github.com/mbravovaisma/authorizer/internal/core/constants"
+	"github.com/mbravovaisma/authorizer/internal/core/constants"
 	"github.com/mbravovaisma/authorizer/internal/core/domain"
 	"github.com/mbravovaisma/authorizer/internal/core/ports"
-	"github.com/mbravovaisma/authorizer/pkg/constants"
 )
 
 type service struct {
-	repository ports.AuthorizerRepository
+	repository ports.AccountRepository
 }
 
-func New(repository ports.AuthorizerRepository) *service {
+func New(repository ports.AccountRepository) ports.TransactionService {
 	return &service{
 		repository: repository,
 	}
 }
 
 func (s *service) PerformTransaction(amount int64, merchant string, time time.Time) (domain.Movement, error) {
-	/* Violates the account-not-initialized */
+	// Violates the account-not-initialized
 	if !s.repository.Exist(constants.AccountID) {
 		return domain.Movement{
 			Account:    nil,
-			Violations: []string{v.AccountNotInitialized},
+			Violations: []string{constants.AccountNotInitialized},
 		}, nil
 	}
 
-	/* Create an empty array of violations */
+	// Create an empty array of violations
 	violations := make([]string, 0)
 
-	/* Get account */
+	// Get account
 	account, err := s.repository.Get(constants.AccountID)
 	if err != nil {
-		log.Error("error getting account", zap.Error(err))
+		log.Error("error getting account", log.ErrorField(err))
 		return domain.Movement{}, err
 	}
 
-	/* Violates card-not-active */
+	// Violates card-not-active
 	if !account.HasActiveCard() {
-		violations = append(violations, v.CardNotActive)
+		violations = append(violations, constants.CardNotActive)
 	}
 
-	/* Violates insufficient-limit */
+	// Violates insufficient-limit
 	if !account.HasEnoughAmount(amount) {
-		violations = append(violations, v.InsufficientLimit)
+		violations = append(violations, constants.InsufficientLimit)
 	}
 
-	/* Violates the high-frequency-small-interval */
-	if account.CanMakeATransaction(time) {
-		violations = append(violations, v.HighFrequencySmallInterval)
+	// Violates the high-frequency-small-interval
+	if !account.CanMakeATransaction(time) {
+		violations = append(violations, constants.HighFrequencySmallInterval)
 	}
 
-	/* Make a transaction */
+	// Make a transaction
 	transaction := domain.NewTransaction(amount, merchant, time)
 
-	/* Violates the doubled-transaction */
-	if isDuplicatedTransaction(account, transaction) {
-		violations = append(violations, v.DoubledTransaction)
+	// Violates the doubled-transaction
+	if account.IsDuplicatedTransaction(transaction) {
+		violations = append(violations, constants.DoubledTransaction)
 	}
 
-	/* If a violation occurred, don't execute transaction */
+	// If a violation occurred, don't execute transaction
 	if len(violations) > 0 {
 		return domain.Movement{
 			Account:    &account,
@@ -74,12 +70,12 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 		}, nil
 	}
 
-	/* Processing a transaction in happy path */
-	execute(&account, transaction)
+	// Processing a transaction in happy path
+	account.ExecuteTransaction(transaction)
 
 	err = s.saveAccountIntoRepository(account)
 	if err != nil {
-		log.Error("error saving account", zap.Error(err))
+		log.Error("error saving account", log.ErrorField(err))
 		return domain.Movement{}, err
 	}
 
@@ -91,51 +87,4 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 
 func (s *service) saveAccountIntoRepository(account domain.Account) error {
 	return s.repository.Save(constants.AccountID, account)
-}
-
-func isDuplicatedTransaction(account domain.Account, transaction domain.Transaction) bool {
-	if account.Transactions == nil {
-		return false
-	}
-	// [trx 1, trx2, trx3, trx4]
-	for len(account.Transactions) > 0 {
-		length := len(account.Transactions) - 1
-
-		lastTransaction := account.Transactions[length]
-		if transaction.Time.Before(lastTransaction.Time.Add(config.HighFrequencySmallIntervalTime)) {
-			if transaction.Amount == lastTransaction.Amount && transaction.Merchant == lastTransaction.Merchant {
-				return true
-			}
-		} else {
-			return false
-		}
-
-		account.Transactions = account.Transactions[:length]
-	}
-
-	return false
-}
-
-func execute(account *domain.Account, transaction domain.Transaction) {
-	/* Subtract amount from available limit */
-	account.AvailableLimit -= transaction.Amount
-
-	/* Generate a movement */
-	movement := domain.Movement{
-		Account:    account,
-		Violations: []string{},
-	}
-	account.Movements = append(account.Movements, movement)
-
-	/* Save transaction */
-	account.Transactions = append(account.Transactions, transaction)
-
-	/* Should be update last authorization time? */
-	if account.ViolatesTheIntervalToPerformATransaction(transaction.Time) {
-		account.Attempts = 0
-		account.AuthorizationTime = transaction.Time
-	}
-
-	/* Add an attempt */
-	account.Attempts += 1
 }

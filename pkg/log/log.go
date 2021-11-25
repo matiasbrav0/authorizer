@@ -6,6 +6,8 @@ import (
 	"go.uber.org/zap"
 )
 
+type Field = zap.Field
+
 var defaultLogger zap.Logger
 
 func init() {
@@ -16,14 +18,18 @@ func init() {
 	defaultLogger = *logger
 }
 
-func Info(msg string, fields ...zap.Field) {
+func Info(msg string, fields ...Field) {
 	defaultLogger.Info(msg, fields...)
 }
 
-func Fatal(msg string, fields ...zap.Field) {
+func Fatal(msg string, fields ...Field) {
 	defaultLogger.Fatal(msg, fields...)
 }
 
-func Error(msg string, fields ...zap.Field) {
+func Error(msg string, fields ...Field) {
 	defaultLogger.Error(msg, fields...)
+}
+
+func ErrorField(err error) Field {
+	return zap.Error(err)
 }

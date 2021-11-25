@@ -6,7 +6,6 @@ import (
 	"strings"
 
 	"github.com/mbravovaisma/authorizer/pkg/log"
-	"go.uber.org/zap"
 
 	"github.com/mbravovaisma/authorizer/internal/core/ports"
 )
@@ -26,28 +25,28 @@ func NewSelector(accountService ports.AccountService, transactionService ports.T
 func (s *selector) OperationSelector(request []byte) (Response, error) {
 	operation := string(request)
 
-	/* Perform an account operation */
+	// Perform an account operation
 	if strings.Contains(operation, "account") {
 		var accountOperation AccountOperation
 		if err := json.Unmarshal(request, &accountOperation); err != nil {
-			log.Error("can't unmarshal account request", zap.Error(err))
+			log.Error("can't unmarshal account request", log.ErrorField(err))
 			return Response{}, err
 		}
 
 		r, err := s.accountService.Create(accountOperation.Account.ActiveCard, accountOperation.Account.AvailableLimit)
 		if err != nil {
-			log.Error("error creating account", zap.Error(err))
+			log.Error("error creating account", log.ErrorField(err))
 			return Response{}, err
 		}
 
 		return BuildResponse(r), nil
 	}
 
-	/* Perform a transaction operation */
+	// Perform a transaction operation
 	if strings.Contains(operation, "transaction") {
 		var transactionOperation TransactionOperation
 		if err := json.Unmarshal(request, &transactionOperation); err != nil {
-			log.Error("can't unmarshal transaction request", zap.Error(err))
+			log.Error("can't unmarshal transaction request", log.ErrorField(err))
 			return Response{}, err
 		}
 
@@ -57,16 +56,16 @@ func (s *selector) OperationSelector(request []byte) (Response, error) {
 			transactionOperation.Transaction.Time,
 		)
 		if err != nil {
-			log.Error("error performing transaction", zap.Error(err))
+			log.Error("error performing transaction", log.ErrorField(err))
 			return Response{}, err
 		}
 
 		return BuildResponse(r), nil
 	}
 
-	/* Invalid operation */
+	// Invalid operation
 	err := fmt.Errorf("invalid operation, request: %s", request)
-	log.Error("invalid operation", zap.Error(err))
+	log.Error("invalid operation", log.ErrorField(err))
 
 	return Response{}, err
 }

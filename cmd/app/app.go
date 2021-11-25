@@ -6,27 +6,25 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mbravovaisma/authorizer/internal/repositories/authorizerrepo"
-
 	"github.com/mbravovaisma/authorizer/internal/core/services/accountsrv"
 	"github.com/mbravovaisma/authorizer/internal/core/services/transactionsrv"
 	"github.com/mbravovaisma/authorizer/internal/operation"
+	"github.com/mbravovaisma/authorizer/internal/repositories/accountrepo"
 
 	"github.com/mbravovaisma/authorizer/pkg/log"
-	"go.uber.org/zap"
 )
 
 func Start() {
 	scanner := bufio.NewScanner(os.Stdin)
 
-	mem := authorizerrepo.New()
+	mem := accountrepo.New()
 	transactionService := transactionsrv.New(mem)
 	accountService := accountsrv.New(mem)
 	selector := operation.NewSelector(accountService, transactionService)
 
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
-			log.Error("error while scan a new line of operations", zap.Error(err))
+			log.Error("error while scan a new line of operations", log.ErrorField(err))
 		}
 
 		response, _ := selector.OperationSelector(scanner.Bytes())

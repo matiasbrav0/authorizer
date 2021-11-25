@@ -1,4 +1,4 @@
-package authorizerrepo
+package accountrepo
 
 import (
 	"github.com/mbravovaisma/authorizer/internal/core/domain"
