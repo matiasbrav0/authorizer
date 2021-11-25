@@ -44,19 +44,19 @@ func (a *Account) HasEnoughAmount(amount int64) bool {
 }
 
 func (a *Account) CanMakeATransaction(transactionTime time.Time) bool {
-	return a.Attempts < maxAttempts && a.notViolatesTheIntervalToPerformATransaction(transactionTime)
+	return a.Attempts < maxAttempts || a.notViolatesTheIntervalToPerformATransaction(transactionTime)
 }
 
 func (a *Account) IsDuplicatedTransaction(transaction Transaction) bool {
-	transactions := a.Transactions
-	if transactions == nil {
+	if a.Transactions == nil {
 		return false
 	}
 
-	for len(transactions) > 0 {
-		index := len(transactions) - 1
+	index := len(a.Transactions) - 1
+	for index > -1 {
+		lastTransaction := a.Transactions[index]
 
-		lastTransaction := transactions[index]
+		// Only going to analyze the transactions that were made before of maxTimeToDuplicateATransaction (2 minutes)
 		if transaction.Time.Before(lastTransaction.Time.Add(maxTimeToDuplicateATransaction)) {
 			if transaction.Amount == lastTransaction.Amount && transaction.Merchant == lastTransaction.Merchant {
 				return true
@@ -65,7 +65,7 @@ func (a *Account) IsDuplicatedTransaction(transaction Transaction) bool {
 			return false
 		}
 
-		transactions = transactions[:index]
+		index -= 1
 	}
 
 	return false
