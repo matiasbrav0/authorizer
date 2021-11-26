@@ -67,6 +67,8 @@ I did a diagram to show us graphically the flow of the application
 
 ![activity diagram authorizer flow](./docs/activiry_diagram_authorizer_flow.svg)
 
+## Greetings
+
 I hope to meet your expectations and to have created a simple and elegant application.
 
 Matias Bravo :wolf:
