@@ -31,10 +31,13 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 
 #### Run
 
+#### Run in your computer
+
+- Unzip the zip file in $GOPATH/src/github.com/mbravovaisma/
 - If it's your first running, you must download the dependencies. Run at the root project:
 
 ```
--> go mod tidy
+-> go mod download
 ```
 
 - To run main package:
@@ -42,6 +45,23 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 ``` 
 -> go run main.go < {your_operations_file} 
 ```
+
+#### Run with docker
+
+- Build a docker image
+
+```
+-> docker build -t authorizer .
+```
+
+- Run the image in interactive mode
+
+```
+-> docker run -i authorizer
+```
+
+- You can start the application running `go run main.go` and then start sending the operations one by one from the console
+- Or you can load the operation files in the root of the project, run the docker commands again and then we will have the ops files in the container. Just run `go run main.go < {file_name}` and watch the output.
 
 ## Additional comments
 
