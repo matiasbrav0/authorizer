@@ -8,7 +8,7 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func TestIntegration(t *testing.T) {
+func Test_Integration(t *testing.T) {
 	// ----- Setup ----- //
 	var stdin bytes.Buffer
 	var stdout bytes.Buffer

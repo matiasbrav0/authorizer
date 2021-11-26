@@ -49,13 +49,13 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 		violations = append(violations, constants.InsufficientLimit)
 	}
 
-	// Violates the high-frequency-small-interval
-	if !account.CanMakeATransaction(time) {
-		violations = append(violations, constants.HighFrequencySmallInterval)
-	}
-
 	// Make a transaction
 	transaction := domain.NewTransaction(amount, merchant, time)
+
+	// Violates the high-frequency-small-interval
+	if !account.CanMakeATransaction(transaction) {
+		violations = append(violations, constants.HighFrequencySmallInterval)
+	}
 
 	// Violates the doubled-transaction
 	if account.IsDuplicatedTransaction(transaction) {

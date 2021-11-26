@@ -43,8 +43,8 @@ func (a *Account) HasEnoughAmount(amount int64) bool {
 	return a.AvailableLimit >= amount
 }
 
-func (a *Account) CanMakeATransaction(transactionTime time.Time) bool {
-	return a.Attempts < maxAttempts || a.notViolatesTheIntervalToPerformATransaction(transactionTime)
+func (a *Account) CanMakeATransaction(transaction *Transaction) bool {
+	return a.Attempts < maxAttempts || a.notViolatesTheIntervalToPerformATransaction(transaction.Time)
 }
 
 func (a *Account) IsDuplicatedTransaction(transaction *Transaction) bool {
