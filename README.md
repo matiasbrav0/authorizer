@@ -9,7 +9,7 @@ This application is in charge of authorizing the transactions in the accounts.
 For my solution I chose the **Go language** because I feel comfortable with it. It's a very powerful and performant 
 language. It's also very good when it comes to implementing microservices.
 
-I choose to apply an **hexagonal architecture** (a.k.a. DDD or Domain-Driven Design) because I've been working with this 
+I chose to apply an **hexagonal architecture** (a.k.a. DDD or Domain-Driven Design) because I've been working with this 
 architecture for 2+ years, and I think if it is well applied it gives solutions that scale correctly and each layer has its
 own logic and responsibilities well separated from the rest. All of this together prevents possible bad practices (e.g. spaghetti code) 
 and if in the future changing a component, it's very easy to do. 
