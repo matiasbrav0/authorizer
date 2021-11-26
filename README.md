@@ -59,7 +59,7 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 ```
 
 - You can start the application running `go run main.go` and then start sending the operations one by one from the console
-- Or you can load the operation files in the root of the project, run the docker commands again and then we will have the ops files in the container. Just run `go run main.go < {file_name}` and watch the output.
+- Or you can load the operation files in the root of the project, run the docker commands again and then we will have the operation files in the container. Just run `go run main.go < {file_name}` and watch the output.
 
 ## Additional comments
 
