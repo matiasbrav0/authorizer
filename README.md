@@ -29,8 +29,6 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 - Go 1.15
 - Operations file to send via stdin
 
-#### Run
-
 ##### Run in your computer
 
 - Unzip the zip file in $GOPATH/src/github.com/mbravovaisma/
