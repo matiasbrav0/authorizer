@@ -31,7 +31,7 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 
 #### Run
 
-#### Run in your computer
+##### Run in your computer
 
 - Unzip the zip file in $GOPATH/src/github.com/mbravovaisma/
 - If it's your first running, you must download the dependencies. Run at the root project:
@@ -46,7 +46,7 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 -> go run main.go < {your_operations_file} 
 ```
 
-#### Run with docker
+##### Run with docker
 
 - Build a docker image
 
