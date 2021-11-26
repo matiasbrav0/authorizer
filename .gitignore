@@ -15,6 +15,7 @@
 Authorizer_Coding_Challenge.pdf
 operations
 operations.*
+*.zip
 
 # Ide
 .idea

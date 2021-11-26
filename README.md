@@ -52,10 +52,16 @@ I used **[Go modules](https://go.dev/blog/using-go-modules)** to manage my depen
 -> docker build -t authorizer .
 ```
 
-- Run the image in interactive mode
+- Run the image
 
 ```
--> docker run -i authorizer
+-> docker run -t -d --name=authorizer authorizer
+```
+
+- Connect with the container
+
+```
+-> docker exec -it authorizer /bin/sh
 ```
 
 - You can start the application running `go run main.go` and then start sending the operations one by one from the console
