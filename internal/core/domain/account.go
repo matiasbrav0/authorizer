@@ -25,8 +25,8 @@ type Account struct {
 	Attempts          uint8         `json:"-"`
 }
 
-func NewAccount(activeCard bool, availableLimit int64) Account {
-	return Account{
+func NewAccount(activeCard bool, availableLimit int64) *Account {
+	return &Account{
 		ActiveCard:     activeCard,
 		AvailableLimit: availableLimit,
 		Movements:      []Movement{},
@@ -47,7 +47,7 @@ func (a *Account) CanMakeATransaction(transactionTime time.Time) bool {
 	return a.Attempts < maxAttempts || a.notViolatesTheIntervalToPerformATransaction(transactionTime)
 }
 
-func (a *Account) IsDuplicatedTransaction(transaction Transaction) bool {
+func (a *Account) IsDuplicatedTransaction(transaction *Transaction) bool {
 	if a.Transactions == nil {
 		return false
 	}
@@ -71,7 +71,7 @@ func (a *Account) IsDuplicatedTransaction(transaction Transaction) bool {
 	return false
 }
 
-func (a *Account) ExecuteTransaction(transaction Transaction) {
+func (a *Account) ExecuteTransaction(transaction *Transaction) {
 	// Subtract amount from available limit
 	a.AvailableLimit = a.AvailableLimit - transaction.Amount
 
@@ -83,7 +83,7 @@ func (a *Account) ExecuteTransaction(transaction Transaction) {
 	a.Movements = append(a.Movements, movement)
 
 	// Save transaction
-	a.Transactions = append(a.Transactions, transaction)
+	a.Transactions = append(a.Transactions, *transaction)
 
 	// Should be update last authorization time?
 	if a.notViolatesTheIntervalToPerformATransaction(transaction.Time) {
@@ -95,7 +95,7 @@ func (a *Account) ExecuteTransaction(transaction Transaction) {
 	a.Attempts += 1
 }
 
-// ··· Private functions ··· //
+// ----- Private functions ----- //
 
 func (a *Account) notViolatesTheIntervalToPerformATransaction(transactionTime time.Time) bool {
 	return transactionTime.After(a.AuthorizationTime.Add(highFrequencySmallIntervalTimeToPerformATransaction))

@@ -17,17 +17,17 @@ func New(repository ports.AccountRepository) ports.AccountService {
 	}
 }
 
-func (s *service) Create(activeCard bool, availableLimit int64) (domain.Movement, error) {
+func (s *service) Create(activeCard bool, availableLimit int64) (*domain.Movement, error) {
 	// Check If account exist
 	if s.repository.Exist(constants.AccountID) {
 		account, err := s.repository.Get(constants.AccountID)
 		if err != nil {
 			log.Error("Error getting account", log.ErrorField(err))
-			return domain.Movement{}, err
+			return nil, err
 		}
 
-		return domain.Movement{
-			Account:    &account,
+		return &domain.Movement{
+			Account:    account,
 			Violations: []string{constants.AccountAlreadyInitialized},
 		}, nil
 	}
@@ -36,14 +36,14 @@ func (s *service) Create(activeCard bool, availableLimit int64) (domain.Movement
 	account := domain.NewAccount(activeCard, availableLimit)
 
 	// Save an account
-	err := s.repository.Save(constants.AccountID, account)
+	err := s.repository.Save(constants.AccountID, *account)
 	if err != nil {
 		log.Error("Error save account", log.ErrorField(err))
-		return domain.Movement{}, err
+		return nil, err
 	}
 
-	return domain.Movement{
-		Account:    &account,
+	return &domain.Movement{
+		Account:    account,
 		Violations: []string{},
 	}, nil
 }

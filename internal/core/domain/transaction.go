@@ -8,8 +8,8 @@ type Transaction struct {
 	Time     time.Time `json:"time"`
 }
 
-func NewTransaction(amount int64, merchant string, time time.Time) Transaction {
-	return Transaction{
+func NewTransaction(amount int64, merchant string, time time.Time) *Transaction {
+	return &Transaction{
 		Amount:   amount,
 		Merchant: merchant,
 		Time:     time,

@@ -3,32 +3,36 @@ package app
 import (
 	"bufio"
 	"encoding/json"
-	"fmt"
-	"os"
+	"io"
 
-	"github.com/mbravovaisma/authorizer/internal/core/services/accountsrv"
-	"github.com/mbravovaisma/authorizer/internal/core/services/transactionsrv"
-	"github.com/mbravovaisma/authorizer/internal/operation"
-	"github.com/mbravovaisma/authorizer/internal/repositories/accountrepo"
+	"github.com/mbravovaisma/authorizer/cmd/dependencies"
 
 	"github.com/mbravovaisma/authorizer/pkg/log"
 )
 
-func Start() {
-	scanner := bufio.NewScanner(os.Stdin)
+func Start(stdin io.Reader, stdout io.Writer) {
+	scanner := bufio.NewScanner(stdin)
+	writer := bufio.NewWriter(stdout)
 
-	mem := accountrepo.New()
-	transactionService := transactionsrv.New(mem)
-	accountService := accountsrv.New(mem)
-	selector := operation.NewSelector(accountService, transactionService)
+	d := dependencies.NewDependencies()
 
 	for scanner.Scan() {
 		if err := scanner.Err(); err != nil {
 			log.Error("error while scan a new line of operations", log.ErrorField(err))
 		}
 
-		response, _ := selector.OperationSelector(scanner.Bytes())
-		responseJson, _ := json.Marshal(response)
-		fmt.Println(string(responseJson))
+		response, err := d.Selector.OperationSelector(scanner.Bytes())
+		if err != nil {
+			log.Error("error while trying to process the request", log.ErrorField(err))
+		}
+
+		responseJson, err := json.Marshal(response)
+		if err != nil {
+			log.Error("error unmarshalling the response", log.ErrorField(err))
+		}
+
+		_, _ = writer.Write(responseJson)
+		_, _ = writer.Write([]byte("\n"))
+		_ = writer.Flush()
 	}
 }

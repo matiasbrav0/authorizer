@@ -2,8 +2,6 @@ package operation
 
 import (
 	"time"
-
-	"github.com/mbravovaisma/authorizer/internal/core/domain"
 )
 
 type AccountsFields struct {
@@ -23,10 +21,4 @@ type TransactionFields struct {
 
 type TransactionOperation struct {
 	Transaction TransactionFields `json:"transaction"`
-}
-
-type Response domain.Movement
-
-func BuildResponse(model domain.Movement) Response {
-	return Response(model)
 }

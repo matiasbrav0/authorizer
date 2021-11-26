@@ -10,19 +10,19 @@ import (
 	"github.com/mbravovaisma/authorizer/internal/core/ports"
 )
 
-type selector struct {
+type Selector struct {
 	accountService     ports.AccountService
 	transactionService ports.TransactionService
 }
 
-func NewSelector(accountService ports.AccountService, transactionService ports.TransactionService) *selector {
-	return &selector{
+func NewSelector(accountService ports.AccountService, transactionService ports.TransactionService) *Selector {
+	return &Selector{
 		accountService:     accountService,
 		transactionService: transactionService,
 	}
 }
 
-func (s *selector) OperationSelector(request []byte) (Response, error) {
+func (s *Selector) OperationSelector(request []byte) (interface{}, error) {
 	operation := string(request)
 
 	// Perform an account operation
@@ -30,16 +30,16 @@ func (s *selector) OperationSelector(request []byte) (Response, error) {
 		var accountOperation AccountOperation
 		if err := json.Unmarshal(request, &accountOperation); err != nil {
 			log.Error("can't unmarshal account request", log.ErrorField(err))
-			return Response{}, err
+			return nil, err
 		}
 
-		r, err := s.accountService.Create(accountOperation.Account.ActiveCard, accountOperation.Account.AvailableLimit)
+		response, err := s.accountService.Create(accountOperation.Account.ActiveCard, accountOperation.Account.AvailableLimit)
 		if err != nil {
 			log.Error("error creating account", log.ErrorField(err))
-			return Response{}, err
+			return nil, err
 		}
 
-		return BuildResponse(r), nil
+		return response, nil
 	}
 
 	// Perform a transaction operation
@@ -47,25 +47,25 @@ func (s *selector) OperationSelector(request []byte) (Response, error) {
 		var transactionOperation TransactionOperation
 		if err := json.Unmarshal(request, &transactionOperation); err != nil {
 			log.Error("can't unmarshal transaction request", log.ErrorField(err))
-			return Response{}, err
+			return nil, err
 		}
 
-		r, err := s.transactionService.PerformTransaction(
+		response, err := s.transactionService.PerformTransaction(
 			transactionOperation.Transaction.Amount,
 			transactionOperation.Transaction.Merchant,
 			transactionOperation.Transaction.Time,
 		)
 		if err != nil {
 			log.Error("error performing transaction", log.ErrorField(err))
-			return Response{}, err
+			return nil, err
 		}
 
-		return BuildResponse(r), nil
+		return response, nil
 	}
 
 	// Invalid operation
 	err := fmt.Errorf("invalid operation, request: %s", request)
 	log.Error("invalid operation", log.ErrorField(err))
 
-	return Response{}, err
+	return nil, err
 }

@@ -20,10 +20,10 @@ func New(repository ports.AccountRepository) ports.TransactionService {
 	}
 }
 
-func (s *service) PerformTransaction(amount int64, merchant string, time time.Time) (domain.Movement, error) {
+func (s *service) PerformTransaction(amount int64, merchant string, time time.Time) (*domain.Movement, error) {
 	// Violates the account-not-initialized
 	if !s.repository.Exist(constants.AccountID) {
-		return domain.Movement{
+		return &domain.Movement{
 			Account:    nil,
 			Violations: []string{constants.AccountNotInitialized},
 		}, nil
@@ -36,7 +36,7 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 	account, err := s.repository.Get(constants.AccountID)
 	if err != nil {
 		log.Error("error getting account", log.ErrorField(err))
-		return domain.Movement{}, err
+		return nil, err
 	}
 
 	// Violates card-not-active
@@ -64,8 +64,8 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 
 	// If a violation occurred, don't execute transaction
 	if len(violations) > 0 {
-		return domain.Movement{
-			Account:    &account,
+		return &domain.Movement{
+			Account:    account,
 			Violations: violations,
 		}, nil
 	}
@@ -76,15 +76,15 @@ func (s *service) PerformTransaction(amount int64, merchant string, time time.Ti
 	err = s.saveAccountIntoRepository(account)
 	if err != nil {
 		log.Error("error saving account", log.ErrorField(err))
-		return domain.Movement{}, err
+		return nil, err
 	}
 
-	return domain.Movement{
-		Account:    &account,
+	return &domain.Movement{
+		Account:    account,
 		Violations: violations,
 	}, nil
 }
 
-func (s *service) saveAccountIntoRepository(account domain.Account) error {
-	return s.repository.Save(constants.AccountID, account)
+func (s *service) saveAccountIntoRepository(account *domain.Account) error {
+	return s.repository.Save(constants.AccountID, *account)
 }
