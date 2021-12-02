@@ -19,6 +19,7 @@ const (
 type Account struct {
 	ActiveCard        bool          `json:"active-card"`
 	AvailableLimit    int64         `json:"available-limit"`
+	AllowListed       bool          `json:"allow-listed"`
 	Movements         []Movement    `json:"-"`
 	Transactions      []Transaction `json:"-"`
 	AuthorizationTime time.Time     `json:"-"`
@@ -29,6 +30,7 @@ func NewAccount(activeCard bool, availableLimit int64) *Account {
 	return &Account{
 		ActiveCard:     activeCard,
 		AvailableLimit: availableLimit,
+		AllowListed:    false,
 		Movements:      []Movement{},
 		Transactions:   []Transaction{},
 		Attempts:       0,
@@ -44,10 +46,23 @@ func (a *Account) HasEnoughAmount(amount int64) bool {
 }
 
 func (a *Account) CanMakeATransaction(transaction *Transaction) bool {
+	if a.isAllowListed() {
+		return true
+	}
+
 	return a.Attempts < maxAttempts || a.notViolatesTheIntervalToPerformATransaction(transaction.Time)
 }
 
+func (a *Account) SetAllowList(value bool) *Account {
+	a.AllowListed = value
+	return a
+}
+
 func (a *Account) IsDuplicatedTransaction(transaction *Transaction) bool {
+	if a.isAllowListed() {
+		return false
+	}
+
 	if a.Transactions == nil {
 		return false
 	}
@@ -99,4 +114,8 @@ func (a *Account) ExecuteTransaction(transaction *Transaction) {
 
 func (a *Account) notViolatesTheIntervalToPerformATransaction(transactionTime time.Time) bool {
 	return transactionTime.After(a.AuthorizationTime.Add(highFrequencySmallIntervalTimeToPerformATransaction))
+}
+
+func (a *Account) isAllowListed() bool {
+	return a.AllowListed
 }

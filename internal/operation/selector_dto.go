@@ -22,3 +22,11 @@ type TransactionFields struct {
 type TransactionOperation struct {
 	Transaction TransactionFields `json:"transaction"`
 }
+
+type AllowListFields struct {
+	Active bool `json:"active"`
+}
+
+type AllowListOperation struct {
+	AllowList AllowListFields `json:"allow-list"`
+}

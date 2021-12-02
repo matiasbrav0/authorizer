@@ -13,12 +13,18 @@ import (
 type Selector struct {
 	accountService     ports.AccountService
 	transactionService ports.TransactionService
+	allowListService   ports.AllowListService
 }
 
-func NewSelector(accountService ports.AccountService, transactionService ports.TransactionService) *Selector {
+func NewSelector(
+	accountService ports.AccountService,
+	transactionService ports.TransactionService,
+	allowListService ports.AllowListService,
+) *Selector {
 	return &Selector{
 		accountService:     accountService,
 		transactionService: transactionService,
+		allowListService:   allowListService,
 	}
 }
 
@@ -55,6 +61,22 @@ func (s *Selector) OperationSelector(request []byte) (interface{}, error) {
 			transactionOperation.Transaction.Merchant,
 			transactionOperation.Transaction.Time,
 		)
+		if err != nil {
+			log.Error("error performing transaction", log.ErrorField(err))
+			return nil, err
+		}
+
+		return response, nil
+	}
+
+	if strings.Contains(operation, "allow-list") {
+		var allowListOperation AllowListOperation
+		if err := json.Unmarshal(request, &allowListOperation); err != nil {
+			log.Error("can't unmarshal allow list request", log.ErrorField(err))
+			return nil, err
+		}
+
+		response, err := s.allowListService.Set(allowListOperation.AllowList.Active)
 		if err != nil {
 			log.Error("error performing transaction", log.ErrorField(err))
 			return nil, err

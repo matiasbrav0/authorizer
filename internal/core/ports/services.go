@@ -13,3 +13,7 @@ type AccountService interface {
 type TransactionService interface {
 	PerformTransaction(amount int64, merchant string, time time.Time) (*domain.Movement, error)
 }
+
+type AllowListService interface {
+	Set(active bool) (*domain.Movement, error)
+}
